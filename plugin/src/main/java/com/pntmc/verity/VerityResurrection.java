@@ -39,7 +39,7 @@ public final class VerityResurrection implements Listener {
                         return;
                     }
 
-                    VerityEntity.spawnBehind(killer);
+                    VerityEntity.spawn(killer);
 
                     killer.sendMessage("§5Verity đã trở lại...");
                 },
