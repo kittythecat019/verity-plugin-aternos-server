@@ -22,11 +22,15 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Make Maven Wrapper executable
+        run: chmod +x plugin/mvnw
+
       - name: Build with Maven Wrapper
+        working-directory: plugin
         run: ./mvnw -B package
 
       - name: Upload plugin JAR
         uses: actions/upload-artifact@v4
         with:
           name: VerityPlugin
-          path: target/VerityPlugin-1.0.0.jar
+          path: plugin/target/VerityPlugin-1.0.0.jar
