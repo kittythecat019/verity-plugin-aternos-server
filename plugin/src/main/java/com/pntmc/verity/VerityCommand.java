@@ -5,6 +5,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Zombie;
 
 public final class VerityCommand implements CommandExecutor {
 
@@ -17,80 +18,143 @@ public final class VerityCommand implements CommandExecutor {
     ) {
 
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("Chi nguoi choi moi dung duoc lenh nay.");
+
+            sender.sendMessage(
+                    "Chi nguoi choi moi dung duoc lenh nay."
+            );
+
             return true;
         }
 
         if (args.length == 0) {
 
             player.sendMessage("§e/verity spawn");
+            player.sendMessage("§e/verity chase");
+            player.sendMessage("§e/verity stop");
             player.sendMessage("§e/verity kill");
-            player.sendMessage("§e/verity respawn");
 
             return true;
         }
 
         switch (args[0].toLowerCase()) {
 
-            case "spawn", "respawn" -> {
+            case "spawn" -> {
 
-                VerityEntity.spawnBehind(player);
+                VerityEntity.spawn(player);
 
                 player.sendMessage(
-                        "§aVerity đã xuất hiện phía sau bạn."
+                        "§5Verity da xuat hien."
                 );
             }
 
-            case "kill" -> {
+            case "chase" -> {
 
-                Entity target = player.getWorld()
-                        .getNearbyEntities(
-                                player.getLocation(),
-                                5,
-                                5,
-                                5
-                        )
-                        .stream()
-                        .filter(VerityEntity::isVerity)
-                        .findFirst()
-                        .orElse(null);
+                Zombie verity = findNearestVerity(player);
 
-                if (target == null) {
+                if (verity == null) {
 
                     player.sendMessage(
-                            "§cKhông tìm thấy Verity gần bạn."
+                            "§cKhong tim thay Verity."
                     );
 
                     return true;
                 }
 
-                target.remove();
+                VerityEntity.startChase(verity);
 
                 player.sendMessage(
-                        "§aĐã xóa Verity."
+                        "§cVerity bat dau chase."
+                );
+            }
+
+            case "stop" -> {
+
+                Zombie verity = findNearestVerity(player);
+
+                if (verity == null) {
+
+                    player.sendMessage(
+                            "§cKhong tim thay Verity."
+                    );
+
+                    return true;
+                }
+
+                VerityEntity.stopChase(verity);
+
+                player.sendMessage(
+                        "§aVerity da dung lai."
+                );
+            }
+
+            case "kill" -> {
+
+                Zombie verity = findNearestVerity(player);
+
+                if (verity == null) {
+
+                    player.sendMessage(
+                            "§cKhong tim thay Verity."
+                    );
+
+                    return true;
+                }
+
+                verity.remove();
+
+                player.sendMessage(
+                        "§aDa xoa Verity."
                 );
             }
 
             default -> {
 
                 player.sendMessage(
-                        "§cLệnh không hợp lệ."
+                        "§cLenh khong hop le."
                 );
 
-                player.sendMessage(
-                        "§e/verity spawn"
-                );
-
-                player.sendMessage(
-                        "§e/verity kill"
-                );
-
-                player.sendMessage(
-                        "§e/verity respawn"
-                );
+                player.sendMessage("§e/verity spawn");
+                player.sendMessage("§e/verity chase");
+                player.sendMessage("§e/verity stop");
+                player.sendMessage("§e/verity kill");
             }
         }
 
         return true;
+    }
+
+    private Zombie findNearestVerity(Player player) {
+
+        double bestDistance = 8 * 8;
+        Zombie nearest = null;
+
+        for (Entity entity : player.getWorld()
+                .getNearbyEntities(
+                        player.getLocation(),
+                        8,
+                        8,
+                        8
+                )) {
+
+            if (!(entity instanceof Zombie zombie)) {
+                continue;
+            }
+
+            if (!VerityEntity.isVerity(zombie)) {
+                continue;
+            }
+
+            double distance =
+                    zombie.getLocation()
+                            .distanceSquared(player.getLocation());
+
+            if (distance < bestDistance) {
+
+                bestDistance = distance;
+                nearest = zombie;
+            }
+        }
+
+        return nearest;
     }
 }
