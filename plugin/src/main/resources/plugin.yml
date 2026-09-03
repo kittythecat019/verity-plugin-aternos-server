@@ -1,0 +1,14 @@
+name: VerityPlugin
+version: 1.0.0
+main: com.pntmc.verity.VerityPlugin
+api-version: '1.21'
+
+commands:
+  verity:
+    description: Verity control
+    usage: /verity <spawn|kill|respawn>
+    permission: verity.admin
+
+permissions:
+  verity.admin:
+    default: op
